@@ -3,8 +3,8 @@
 
 # API Connection
 apiURL = 'https://aqs.epa.gov/api/rawData?'
-apiUser = 'jason@33sticks.com'
-apiPassword = 'mauvegazelle28'
+apiUser = ''
+apiPassword = ''
 outputFormat = 'DMCSV'
 
 # Basic Query Parameters
