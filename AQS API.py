@@ -36,8 +36,6 @@
 #  SO2 = integer<br>
 #  NO2 = integer
 
-# In[66]:
-
 
 # Import libraries
 import pandas as pd
@@ -45,10 +43,6 @@ import io
 import requests
 import bisect
 import numpy as np
-
-
-# In[67]:
-
 
 # Import Config file defaults
 from src import config
@@ -80,17 +74,12 @@ ozone_breaks_upper = {(0.000, 0.054): 50, (0.055, 0.070): 100, (0.071, 0.085): 1
 
 
 
-# In[68]:
-
-
 # Function to return lower and upper AQI ranges
 def get_range(table, measurement):
     for key in table:
         if key[0] < measurement < key[1]:
             return table[key]
 
-
-# In[69]:
 
 
 # Running the query for an entire state exceeds API size limits so we need to query by county
@@ -115,9 +104,6 @@ for key in county.counties[config.stateName]:
                
 
 
-# In[70]:
-
-
 #Cleanup data frame
 
 #Remove 'END OF FILE' entries
@@ -130,15 +116,10 @@ df = df[df['Sample Duration'] == '1 HOUR']
 df = df.sort_values(['County Code', 'Site Num', 'AQS Parameter Desc', 'Date Local', '24 Hour Local'])
 
 
-# In[72]:
-
 
 # Create a working Dataframe based on County, Site, and AQS Parameter Desc
 # TODO: This needs to be dynamic to build for each county, site, and paramter
 df_ = df.loc[(df['County Code'] == 3) & (df['Site Num'] == 3) & (df['AQS Parameter Desc'] == 'Ozone')]
-
-
-# In[96]:
 
 
 #Reverse the order of the data frame so Pandas rolling can use the "look back" window
@@ -147,9 +128,6 @@ df_ = df_[::-1]
 df_['8 Hour Avg'] = df_['Sample Measurement'].rolling(8, min_periods=8).mean()
 df_['8 Hour Avg'] = df_['8 Hour Avg'].round(3)
 df_ = df_[pd.notnull(df_['8 Hour Avg'])]
-
-
-# In[99]:
 
 
 # Calculate AQI for each measurment observation
@@ -173,23 +151,13 @@ for i, row in df_.iterrows():
        print (aqiAvg, aqiLow, aqiHigh, breakRangeLow, breakRangeHigh, rowAqi)
 
 
-
-# In[102]:
-
-
 # Create a combined dataframe which concats each of the processing dataframes (df_) for each loop through county/site/pollutant
 dfCombined = pd.DataFrame()
 dfCombined = pd.concat([dfCombined,df_])
 
-
-# In[103]:
-
-
 #Output for debugging/validation
 df_.to_csv('AQI_Calc_Out.csv', sep=',')
 
-
-# In[ ]:
 
 
 #TODO: Create a daily summary Dataframe - AQI is defined as the single highest pollutant per day; we can also look at
