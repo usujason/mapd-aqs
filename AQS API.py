@@ -36,6 +36,7 @@
 #  SO2 = integer<br>
 #  NO2 = integer
 
+# In[1]:
 
 
 # Import libraries
@@ -47,6 +48,7 @@ import numpy as np
 import time
 
 
+# In[2]:
 
 
 # Import Config file defaults
@@ -54,7 +56,7 @@ from src import config
 
 # Define Start and End Dates
 config.bDate = '20170101'
-config.eDate = '20170104'
+config.eDate = '20170131'
 
 # Define AQI Lower and Upper Bound Lookup Tables
 
@@ -89,16 +91,17 @@ no2_breaks_upper = {(0.0, 53): 50, (54, 100): 100, (101, 360): 150, (361, 649): 
 
 
 
-
+# In[3]:
 
 
 # Function to return lower and upper AQI ranges
 def get_range(table, measurement):
     for key in table:
-        if key[0] < measurement < key[1]:
+        if key[0] <= measurement <= key[1]:
             return table[key]
 
 
+# In[4]:
 
 
 start = time.time()
@@ -127,7 +130,7 @@ end = time.time()
 print("Process Time: ", end - start)                   
 
 
-
+# In[5]:
 
 
 #Cleanup data frame
@@ -146,7 +149,7 @@ df['Site Num'] = df['Site Num'].astype(int)
 df = df.sort_values(['County Code', 'Site Num', 'Parameter Code', 'Date Local', '24 Hour Local'])
 
 
-
+# In[6]:
 
 
 #AQI Calculation Function
@@ -185,7 +188,7 @@ def calc_aqi(df,county,site,param_code,param_rnd,avg_unit,breaks_lower,breaks_up
     return df_activePollutant
 
 
-
+# In[7]:
 
 
 start = time.time()
@@ -267,4 +270,24 @@ dfCombined.to_csv('processed.csv', sep=',')
 end = time.time()
 print("Records Processed: ", dfCombined.shape[0])
 print("Process Time: ", end - start)   
+
+
+# In[8]:
+
+
+# Create a daily summary
+dfDaily = dfCombined.groupby(['County Code', 'Site Num', 'Latitude','Longitude', 'AQS Parameter Desc', 'Date Local'], sort=False)['AQI'].max().reset_index()
+
+aqi_desc = {(0, 50): "Good", (51, 100): "Moderate", (101, 150): "Unhealthy for Sensitive Groups", (151, 200): "Unhealthy", (201, 300): "Very Unhealthy", (301, 500): "Hazardous"}
+aqi_color = {(0, 50): "Green", (51, 100): "Yellow", (101, 150): "Orange", (151, 200): "Red", (201, 300): "Purple", (301, 500): "Maroon"}
+
+for l, row in dfDaily.iterrows():
+    aqi = row["AQI"]
+    aqiDesc = get_range(aqi_desc, aqi)
+    aqiColor = get_range(aqi_color, aqi)    
+    dfDaily.set_value(l,'AQI Description',aqiDesc)   
+    dfDaily.set_value(l,'AQI Color',aqiColor)  
+
+
+dfDaily.to_csv('daily.csv', sep=',') 
 
