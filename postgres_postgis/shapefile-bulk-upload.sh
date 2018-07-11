@@ -34,9 +34,9 @@ total 408688
 mkdir utah_lir_shapefiles_unzipped && unzip utah_lir_shapefiles/\*.zip -d utah_lir_shapefiles_unzipped
 
 #3. Use -p mode to create table, but not load any data
-shp2pgsql -I -s 4326 -p utah_lir_shapefiles_unzipped/Parcels_Beaver_LIR/Parcels_Beaver_LIR.shp utahlirparcels  | PGPASSWORD=<CHANGEME> psql -h localhost -U mapd gisdata;
+shp2pgsql -I -s 26912 -p utah_lir_shapefiles_unzipped/Parcels_Beaver_LIR/Parcels_Beaver_LIR.shp utahlirparcels  | PGPASSWORD=<CHANGEME> psql -h localhost -U mapd gisdata;
 
 #4. Load all the data using -a mode (append)
-for i in $(find utah_lir_shapefiles_unzipped/ -type f -name '*.shp'); do 
-  shp2pgsql -I -s 4326 -a $i utahlirparcels  | PGPASSWORD=<CHANGEME> psql -h localhost -U mapd gisdata; 
+for i in $(find utah_lir_shapefiles_unzipped/ -type f -name '*.shp'); do
+  shp2pgsql -I -s 26912 -a $i utahlirparcels  | PGPASSWORD=<CHANGEME> psql -h localhost -U mapd gisdata;
 done;
